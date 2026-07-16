@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AI SRE Platform
 
 An AI-driven Site Reliability Engineering platform designed for autonomous infrastructure monitoring, root cause analysis (RCA), and incident remediation.
@@ -37,3 +38,6 @@ This project is structured using Clean Architecture and DDD (Domain-Driven Desig
    ```bash
    make run
    ```
+=======
+# AI-SRE-Platform-for-Autonomous-Operations
+>>>>>>> b8c01eabb3ae59faa047b57fe3944d28ef71435e
