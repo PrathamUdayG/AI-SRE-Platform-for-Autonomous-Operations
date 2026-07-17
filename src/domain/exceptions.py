@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 
 from src.infrastructure.config.settings import settings
 
-
 class DomainError(Exception):
     """Base exception for all domain-level errors."""
 

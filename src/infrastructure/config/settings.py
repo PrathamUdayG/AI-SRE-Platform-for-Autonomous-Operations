@@ -10,8 +10,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class LoggingSettings(BaseSettings):
     """Configuration for structured logging."""
-    model_config = SettingsConfigDict(frozen=True)
-
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
         default="INFO", description="Global log level"
     )
@@ -24,8 +22,6 @@ class LoggingSettings(BaseSettings):
 
 class DatabaseSettings(BaseSettings):
     """PostgreSQL (and TimescaleDB) connection settings."""
-    model_config = SettingsConfigDict(frozen=True)
-
     host: str = Field(..., description="Database hostname")
     port: int = Field(5432, description="Database port")
     username: str = Field(..., description="Database user")
@@ -36,7 +32,6 @@ class DatabaseSettings(BaseSettings):
     ssl_mode: Literal["disable", "require", "verify-full"] = Field(
         default="disable", description="PostgreSQL SSL mode"
     )
-    # TimescaleDB specific
     timescale_enabled: bool = Field(default=True, description="Enable TimescaleDB extensions")
 
     @property
@@ -58,8 +53,6 @@ class DatabaseSettings(BaseSettings):
 
 class RedisSettings(BaseSettings):
     """Redis connection settings for cache, pub/sub, and rate limiting."""
-    model_config = SettingsConfigDict(frozen=True)
-
     host: str = Field(..., description="Redis host")
     port: int = Field(6379, description="Redis port")
     password: Optional[SecretStr] = Field(None, description="Redis password if required")
@@ -76,8 +69,6 @@ class RedisSettings(BaseSettings):
 
 class VectorDbSettings(BaseSettings):
     """Qdrant vector database configuration."""
-    model_config = SettingsConfigDict(frozen=True)
-
     host: str = Field("localhost", description="Qdrant host")
     port: int = Field(6333, description="Qdrant REST API port")
     grpc_port: int = Field(6334, description="Qdrant gRPC port")
@@ -92,8 +83,6 @@ class VectorDbSettings(BaseSettings):
 
 class LLMSettings(BaseSettings):
     """Configuration for all LLM backends we might use."""
-    model_config = SettingsConfigDict(frozen=True)
-
     default_model: str = Field("gpt-4o-mini", description="Default LLM for reasoning")
     azure_endpoint: Optional[str] = Field(None, description="Azure OpenAI endpoint")
     azure_api_key: Optional[SecretStr] = Field(None, description="Azure OpenAI key")
@@ -107,19 +96,14 @@ class LLMSettings(BaseSettings):
 
 class HostingerSettings(BaseSettings):
     """Hostinger VPS specific connectors (will be extended later)."""
-    model_config = SettingsConfigDict(frozen=True)
-
     api_base_url: Optional[str] = Field(None, description="Hostinger API base URL")
     api_token: Optional[SecretStr] = Field(None, description="Hostinger API token")
-    # SSH fallback for host-level Linux operations
     ssh_key_path: Optional[Path] = Field(None, description="Path to private SSH key")
     ssh_username: Optional[str] = Field("root", description="SSH username for hosts")
 
 
 class FeatureFlags(BaseSettings):
     """Feature flags to safely roll out new capabilities."""
-    model_config = SettingsConfigDict(frozen=True)
-
     enable_autonomous_execution: bool = Field(False, description="Allow AI to execute actions")
     enable_llm_rc: bool = Field(True, description="Enable LLM-based root cause analysis")
     enable_vector_knowledge: bool = Field(True, description="Enable RAG knowledge retrieval")
@@ -134,10 +118,9 @@ class Settings(BaseSettings):
     """
     model_config = SettingsConfigDict(
         env_prefix="AI_SRE_",
-        env_nested_delimiter="__",  # e.g., AI_SRE_DATABASE__HOST=...
+        env_nested_delimiter="__",
         case_sensitive=False,
-        extra="forbid",  # Strict – no undeclared env vars
-        frozen=True,
+        extra="forbid",
     )
 
     # ------------------ Nested Configs ------------------
@@ -161,9 +144,9 @@ class Settings(BaseSettings):
     @field_validator("debug", mode="before")
     @classmethod
     def debug_from_env(cls, v):
-        """Coerce environment string 'true'/'false'/'on'/'off' to boolean."""
+        """Coerce environment string 'true'/'false' to boolean."""
         if isinstance(v, str):
-            return v.lower() in ("true", "1", "yes", "on")
+            return v.lower() in ("true", "1", "yes")
         return v
 
 
@@ -174,10 +157,9 @@ def get_settings() -> Settings:
     Load settings from environment variables / .env file.
     Cached so it's loaded only once per process.
     """
-    # Load .env file if present (only in local/dev; in production env vars are set by orchestrator)
     env_file = Path(os.getcwd()) / ".env"
     if env_file.exists():
-        return Settings(_env_file=env_file)  # type: ignore
+        return Settings(_env_file=env_file)
     return Settings()
 
 
@@ -185,23 +167,37 @@ def get_settings() -> Settings:
 settings = get_settings()
 
 
+
 """
-Why this file exists
-To centralise all configuration variables (credentials, URLs, timeouts, feature toggles) that vary across environments 
-(local, staging, production). It eliminates hard‑coded values, prevents secrets from leaking into code, 
-and provides type‑safe access to settings throughout the platform.
+settings.py - Centralized Configuration Management
 
+Purpose:
+    - Single source of truth for all application configuration
+    - Environment-specific settings (dev/staging/prod)
+    - Secure management of sensitive credentials via .env
+    - Type-safe configuration using Pydantic BaseSettings
 
-What problem this file solves
-Security – Secrets come from environment variables / .env files, never committed.
-Consistency – Every module reads the same validated config object.
-Discoverability – All tunable parameters are explicitly declared in one place.
-Fail‑fast – If a required variable is missing or has an invalid type, 
-the application crashes immediately on startup rather than failing at runtime with obscure errors
+Key Responsibilities:
+    1. Load environment variables from .env file
+    2. Define configuration schema with type validation
+    3. Provide default values for non-critical settings
+    4. Expose a singleton 'settings' instance for global access
+    5. Enable dependency injection for testability
 
-Why it belongs in the Infrastructure layer
-Configuration is a technical concern – it deals with external systems,
-deployment environments, and infrastructure credentials.
-The Domain and Application layers should be completely unaware of how a setting is loaded; 
-they only depend on the interface (the Pydantic model). Infrastructure implements the loading mechanism.
+Benefits:
+    - Separation of config from code (12-factor app)
+    - Easy environment switching without code changes
+    - Secret management (credentials never hard-coded)
+    - Centralized validation and error handling
+    - Simplified testing with override capabilities
+
+Usage Pattern:
+    from src.infrastructure.config import settings
+    db_url = settings.DATABASE_URL
+    debug_mode = settings.DEBUG
+
+Dependencies:
+    - pydantic-settings: Environment variable parsing
+    - python-dotenv: .env file loading
+    - os: System environment access
 """
