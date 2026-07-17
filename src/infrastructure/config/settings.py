@@ -21,12 +21,18 @@ class Settings(BaseSettings):
     hostinger: HostingerSettings = HostingerSettings()
     database: DatabaseSettings = DatabaseSettings()
     app_name: str = "AI_SRE"
+    app_env: str = "local"
     debug: bool = False
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
 
 
 settings = Settings()
+
+
+def get_settings() -> Settings:
+    return settings
+
 
 
 

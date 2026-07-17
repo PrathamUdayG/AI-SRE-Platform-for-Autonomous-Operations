@@ -8,7 +8,7 @@ router = APIRouter()
 async def health_check():
     return {
         "status": "healthy",
-        "app_name": settings.APP_NAME,
-        "environment": settings.APP_ENV,
-        "debug_mode": settings.DEBUG
+        "app_name": settings.app_name,
+        "environment": settings.app_env,
+        "debug_mode": settings.debug
     }
