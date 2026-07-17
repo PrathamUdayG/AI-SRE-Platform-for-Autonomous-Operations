@@ -8,7 +8,7 @@ from alembic import context
 # Import your Base and settings
 from src.infrastructure.database import Base
 from src.infrastructure.config.settings import settings
-from src.infrastructure.persistence.models import MetricModel  # noqa: F401
+from src.infrastructure.persistence.models import MetricModel, ServerModel  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

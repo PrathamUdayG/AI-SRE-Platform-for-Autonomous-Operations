@@ -14,7 +14,12 @@ class DatabaseSettings(BaseSettings):
     pool_size: int = 5
     max_overflow: int = 10
     echo: bool = False
-    model_config = SettingsConfigDict(env_prefix="DATABASE_", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="DATABASE_",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 class Settings(BaseSettings):
