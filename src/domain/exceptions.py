@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from src.infrastructure.config.settings import settings
 
+
 class DomainError(Exception):
     """Base exception for all domain-level errors."""
 
@@ -78,24 +79,3 @@ class LLMError(InfrastructureError):
 class ConnectorError(InfrastructureError):
     """Raised when a specific infrastructure connector (Hostinger, AWS) fails."""
     pass
-
-
-"""
-Code summary
-This file defines a family of custom exceptions. All of them inherit from DomainError, which adds a details field and a to_dict() method. 
-The to_dict() method is used by the API to return structured JSON errors. It also automatically includes the stack trace only when settings.
-debug=True – so in production, we don't leak internals.
-
-Why this folder?
-Because errors that represent business rules (e.g., "this action violates a policy") or domain concepts (e.g., "incident not found")
-belong in the Domain layer. Infrastructure exceptions (e.g., "can't connect to Redis") also inherit from our base domain error so they're handled uniformly, but the root definitions live here.
-
-Which module owns it?
-The Domain module – it's a core part of the business logic.
-
- Future files that depend on it
-All Application services – they raise these exceptions.
-All API endpoints – they catch these exceptions and map them to HTTP responses.
-All Infrastructure connectors – they raise InfrastructureError or ConnectionError when something external fails.
-
-"""
