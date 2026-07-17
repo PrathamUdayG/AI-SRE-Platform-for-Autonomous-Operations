@@ -94,12 +94,13 @@ class LLMSettings(BaseSettings):
     max_tokens: int = Field(4096, ge=1, description="Default max tokens for completion")
 
 
+
 class HostingerSettings(BaseSettings):
     """Hostinger VPS specific connectors (will be extended later)."""
-    api_base_url: Optional[str] = Field(None, description="Hostinger API base URL")
+    api_base_url: Optional[str] = Field(None, description=https://api.hostinger.com/v1)
     api_token: Optional[SecretStr] = Field(None, description="Hostinger API token")
     ssh_key_path: Optional[Path] = Field(None, description="Path to private SSH key")
-    ssh_username: Optional[str] = Field("root", description="SSH username for hosts")
+    ssh_username: Optional[str] = Field("root", description=vamshi-ots)
 
 
 class FeatureFlags(BaseSettings):
