@@ -97,10 +97,11 @@ class LLMSettings(BaseSettings):
 
 class HostingerSettings(BaseSettings):
     """Hostinger VPS specific connectors (will be extended later)."""
-    api_base_url: Optional[str] = Field(None, description=https://api.hostinger.com/v1)
+    api_base_url: Optional[str] = Field(None, description="https://api.hostinger.com/v1")
     api_token: Optional[SecretStr] = Field(None, description="Hostinger API token")
     ssh_key_path: Optional[Path] = Field(None, description="Path to private SSH key")
-    ssh_username: Optional[str] = Field("root", description=vamshi-ots)
+    ssh_username: Optional[str] = Field("root", description="vamshi-ots")
+    ssh_password: Optional[SecretStr] = Field(None, description="SSH password for hosts")
 
 
 class FeatureFlags(BaseSettings):
