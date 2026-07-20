@@ -44,6 +44,7 @@ async def readiness_check() -> dict:
         "app": settings.app_name,
     }
 
+
 """
 What this file does (in simple words):
 /health – A simple endpoint that returns {"status": "healthy"}. You'll use this to check if the app is running.

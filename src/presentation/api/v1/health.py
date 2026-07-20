@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from src.infrastructure.config import settings
 
 router = APIRouter()
@@ -10,5 +11,5 @@ async def health_check():
         "status": "healthy",
         "app_name": settings.app_name,
         "environment": settings.app_env,
-        "debug_mode": settings.debug
+        "debug_mode": settings.debug,
     }

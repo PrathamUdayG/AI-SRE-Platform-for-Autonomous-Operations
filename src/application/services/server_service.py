@@ -5,12 +5,15 @@
 
 import ipaddress
 import re
+
 import structlog
+
 from src.domain.entities.server import Server
+from src.domain.exceptions import ConflictError, ValidationError
 from src.domain.repositories.server_repository import ServerRepository
-from src.domain.exceptions import ValidationError, ConflictError
 
 logger = structlog.get_logger(__name__)
+
 
 class ServerService:
     """
@@ -47,7 +50,11 @@ class ServerService:
 
         # 4. Check if server already exists by hostname or IP address
         if await self.repository.exists(hostname, ip_address):
-            logger.warning("Conflict detected during server registration", hostname=hostname, ip_address=ip_address)
+            logger.warning(
+                "Conflict detected during server registration",
+                hostname=hostname,
+                ip_address=ip_address,
+            )
             raise ConflictError(
                 f"A server with hostname '{hostname}' or IP '{ip_address}' already exists."
             )
@@ -63,7 +70,11 @@ class ServerService:
 
         # 6. Save using repository
         saved_server = await self.repository.save(new_server)
-        logger.info("Server registered successfully", server_id=saved_server.id, hostname=hostname)
+        logger.info(
+            "Server registered successfully",
+            server_id=saved_server.id,
+            hostname=hostname,
+        )
 
         return saved_server
 
@@ -73,7 +84,9 @@ class ServerService:
         if len(hostname) > 253:
             raise ValidationError("Hostname cannot be longer than 253 characters.")
         # Hostname regex (RFC 1123 compliant hostname label checks)
-        hostname_regex = r"^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.[a-zA-Z0-9-]{1,63})*$"
+        hostname_regex = (
+            r"^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.[a-zA-Z0-9-]{1,63})*$"
+        )
         if not re.match(hostname_regex, hostname):
             raise ValidationError(f"Invalid hostname format: '{hostname}'")
 

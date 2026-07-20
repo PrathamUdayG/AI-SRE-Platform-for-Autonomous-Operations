@@ -1,13 +1,15 @@
 import asyncio
 from logging.config import fileConfig
+
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
 from alembic import context
+from src.infrastructure.config.settings import settings
 
 # Import your Base and settings
 from src.infrastructure.database import Base
-from src.infrastructure.config.settings import settings
 from src.infrastructure.persistence.models import MetricModel, ServerModel  # noqa: F401
 
 # this is the Alembic Config object, which provides

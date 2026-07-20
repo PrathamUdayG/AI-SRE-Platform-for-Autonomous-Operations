@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
-from typing import Optional, Dict
+from typing import Dict, Optional
+
 from pydantic import BaseModel, Field
 
 
 class Metric(BaseModel):
     """Domain entity representing a single time‑series metric."""
+
     id: Optional[int] = None
     name: str = Field(..., description="Metric name, e.g. 'cpu.usage'")
     value: float = Field(..., description="Numeric value")
@@ -22,6 +24,8 @@ class Metric(BaseModel):
             }
         }
     }
+
+
 """
 What This File Does
 1. Defines the Structure of a Metric

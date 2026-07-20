@@ -1,6 +1,6 @@
 # src/domain/interfaces/repositories.py
 from abc import ABC, abstractmethod
-from typing import Generic, List, Optional, TypeVar, Any
+from typing import Any, Generic, List, Optional, TypeVar
 
 # Generic type: T will be replaced by a real entity (e.g., Incident, Server)
 T = TypeVar("T")
@@ -42,6 +42,7 @@ class IRepository(ABC, Generic[T]):
         Returns True if deleted, False if not found.
         """
         pass
+
 
 """
 Summary

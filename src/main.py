@@ -5,15 +5,23 @@
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+
+from src.domain.exceptions import (
+    ConflictError,
+    DomainError,
+    NotFoundError,
+    UnauthorizedError,
+    ValidationError,
+)
 from src.presentation.api.v1 import router as v1_router
 from src.presentation.api.v1.health import router as health_router
-from src.domain.exceptions import DomainError, NotFoundError, ValidationError, ConflictError, UnauthorizedError
 
 app = FastAPI(
     title="AI_SRE Platform",
     description="Autonomous SRE with AI",
     version="0.1.0",
 )
+
 
 # Centralized exception handler for DomainError
 @app.exception_handler(DomainError)
@@ -27,15 +35,14 @@ async def domain_error_handler(request: Request, exc: DomainError):
         status_code = status.HTTP_409_CONFLICT
     elif isinstance(exc, UnauthorizedError):
         status_code = status.HTTP_401_UNAUTHORIZED
-        
-    return JSONResponse(
-        status_code=status_code,
-        content=exc.to_dict()
-    )
+
+    return JSONResponse(status_code=status_code, content=exc.to_dict())
+
 
 # Mount routes
-app.include_router(health_router)   # /health and /health/readiness
-app.include_router(v1_router)        # /api/v1/...
+app.include_router(health_router)  # /health and /health/readiness
+app.include_router(v1_router)  # /api/v1/...
+
 
 @app.get("/")
 async def root():

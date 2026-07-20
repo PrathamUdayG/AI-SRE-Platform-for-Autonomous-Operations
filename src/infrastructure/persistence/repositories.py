@@ -1,13 +1,19 @@
+# src/infrastructure/persistence/repositories.py
+"""Concrete implementation of MetricRepository using PostgreSQL and SQLAlchemy."""
+
 from typing import List, Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.domain.interfaces.repositories import IRepository
 from src.domain.entities.metric import Metric
+from src.domain.repositories.metric_repository import (
+    MetricRepository as IMetricRepository,
+)
 from src.infrastructure.persistence.models import MetricModel
 
 
-class MetricRepository(IRepository[Metric]):
+class MetricRepository(IMetricRepository):
     """Concrete repository for Metric entities using PostgreSQL + async SQLAlchemy."""
 
     def __init__(self, session: AsyncSession):
@@ -48,9 +54,11 @@ class MetricRepository(IRepository[Metric]):
             tags=db_obj.tags,
         )
 
-    async def get_all(self) -> List[Metric]:
-        """Retrieve all metrics (use with care – we'll add pagination later)."""
-        result = await self._session.execute(select(MetricModel))
+    async def get_all(self, limit: int = 100, offset: int = 0) -> List[Metric]:
+        """Retrieve a list of metrics with pagination."""
+        result = await self._session.execute(
+            select(MetricModel).offset(offset).limit(limit)
+        )
         db_objs = result.scalars().all()
 
         return [
@@ -65,25 +73,11 @@ class MetricRepository(IRepository[Metric]):
             for obj in db_objs
         ]
 
-    async def delete(self, entity_id: int) -> None:
+    async def delete(self, entity_id: int) -> bool:
         """Delete a metric by its ID."""
         db_obj = await self._session.get(MetricModel, entity_id)
         if db_obj:
             await self._session.delete(db_obj)
             await self._session.commit()
-
-"""
-Metric (domain entity) – a plain Python class (using Pydantic) that your application logic will use. It knows nothing about databases.
-
-MetricModel (ORM model) – tells SQLAlchemy how to map the Metric to a database table called metrics. Each column matches a field in the entity.
-
-MetricRepository – is a class that implements the IRepository interface you already wrote. It uses an AsyncSession (from our get_db dependency) to actually talk to the database.
-
-save → converts your domain Metric into an ORM model, inserts it, commits, and returns the metric with the new ID.
-
-get_by_id → queries the database, converts the result back into a domain Metric.
-
-get_all → gets all rows (good for testing, we’ll add pagination later).
-
-delete → removes a row by ID.
-"""
+            return True
+        return False

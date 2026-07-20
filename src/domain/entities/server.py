@@ -5,10 +5,13 @@
 
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, Field
+
 
 class Server(BaseModel):
     """Domain entity representing a physical or virtual server instance."""
+
     id: Optional[int] = None
     hostname: str = Field(..., description="Unique hostname of the server")
     ip_address: str = Field(..., description="Unique IP address of the server")

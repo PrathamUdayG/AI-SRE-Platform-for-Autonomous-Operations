@@ -5,8 +5,10 @@
 
 from abc import abstractmethod
 from typing import Optional
+
 from src.domain.entities.server import Server
 from src.domain.interfaces.repositories import IRepository
+
 
 class ServerRepository(IRepository[Server]):
     """Interface for Server repository operations."""

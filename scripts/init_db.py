@@ -1,5 +1,6 @@
 import asyncio
 import sys
+
 from src.infrastructure.config import settings
 
 
